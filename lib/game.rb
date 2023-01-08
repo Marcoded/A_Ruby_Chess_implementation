@@ -1,19 +1,19 @@
 #rubocop :disable all
 require_relative "board"
 class Game
-    attr_accessor :current_game_player
+    attr_accessor :current_game_player, :check_mate, :stale_mate
     def initialize
         @current_game_player = 0
         @game_board = Board.new
-        @game_board.delete_all_piece
-        @game_board.setup_close_to_chess
         @check_mate = false
+        @stale_mate = false
 
     end
 
     def update_player_turn_from_piece_storage
         king = @game_board.grab_king(0)
-        puts "DEBUG update fonction launched"
+        puts "SAVING FONC"
+        puts "king storage is now #{king.storage_turn}"
         @current_game_player = king.storage_turn
         puts "DEBUG Current_game_player is now #{@current_game_player}"
 
@@ -23,7 +23,7 @@ class Game
         king = @game_board.grab_king(0)
         puts "DEBUG update fonction launched"
         king.storage_turn = @current_game_player
-        puts "DEBUG Current_game_player is now #{@current_game_player}"  
+        puts "king storage is now #{king.storage_turn}"
     end
 
     def alternate_player
@@ -83,8 +83,15 @@ class Game
           return @game_board.alba_serialize
 
         when "LOAD"
+          
+          
           @game_board.full_load_game
-          update_player_turn_from_piece_storage()
+          #update_player_turn_from_piece_storage()
+          @current_game_player = @game_board.grab_king(0).color_binary
+          puts "setting up current game player"
+          puts " currnt g p #{@current_game_player} and king stor #{@game_board.grab_king(0).color_binary}"
+          
+          puts "EXITING LOAD"
           return
         end
         return input 
@@ -94,9 +101,14 @@ class Game
       loop do
         puts "Player #{@current_game_player + 1}, where you you want to move you #{first_piece.instance_class_name}."
         input = square_to_coords
+        
+        
 
-        destination_piece = @game_board.find_piece_at(input[0], input[1])
-        @game_board.check_chess_for_one_move(first_piece,opponent_player,input)
+        if @game_board.chess_for_one_move(first_piece.color_binary,first_piece,input)
+          puts "Your king is still in chess with that move, please do another move"
+          next
+        end
+          
         
 
 
@@ -151,8 +163,8 @@ class Game
     def brute_move(start_piece,destinationXY)
         destination_piece = @game_board.find_piece_at(destinationXY[0],destinationXY[1])
         if destination_piece
-          piece.position = destination_piece.position
-          puts "Your #{piece.instance_class_name} took the opponent #{destination_piece.instance_class_name}"
+          start_piece.position = destination_piece.position
+          puts "Your #{start_piece.instance_class_name} took the opponent #{destination_piece.instance_class_name}"
           @game_board.pieces_arr.delete(destination_piece)
           
           return
@@ -161,6 +173,7 @@ class Game
         start_piece.position = [destinationXY[0],destinationXY[1]]
         start_piece.moved = true
         puts "Player #{@current_game_player +1 } moved its #{start_piece.instance_class_name}"
+        start_piece.promotion(@game_board)
         return
     end
 
@@ -200,8 +213,14 @@ class Game
 
     def game_loop
       loop do
-      player_turn
+      @check_mate = @game_board.check_mate_2?(0)
+      @check_mate = @game_board.check_mate_2?(1)
+      @stale_mate = @game_board.stale_mate?(0)
+      @stale_mate = @game_board.stale_mate?(1)
       break if @check_mate == true
+      break if @stale_mate == true
+      player_turn
+      
       end
 
     end

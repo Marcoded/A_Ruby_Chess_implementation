@@ -12,6 +12,8 @@ module Illegal_move
   end
 end
 
+
+
 module QueenRookBishopTakeAndMove
   include Illegal_move
     def move?(board_obj, destinationX, destinationY)
@@ -346,7 +348,7 @@ class Pawn < Piece
 
     def take?(board_obj, aimX, aimY)
         current_x, current_y = position[0], position[1]
-        @move_set.each do |move|
+        @capture_move_set.each do |move|
           next_x, next_y = current_x + move[0], current_y + move[1]
           if next_x == aimX && next_y == aimY && on_board?(next_x, next_y)
             piece = board_obj.find_piece_at(next_x, next_y)

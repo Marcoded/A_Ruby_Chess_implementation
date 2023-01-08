@@ -178,7 +178,7 @@ class Board
         can_escape = false
         old_pos = piece.position
         puts "DEBUG RUNING MOVE PIECE FOR #{piece.quick_info}"
-        puts "DEBUG, COLOR BINARY IS #{defender_color_binary}"
+        puts "is  #{defender_color_binary} in chess?"
         
         piece.possible_moves_and_take(self).each do |move|
             piece.position = move
@@ -189,6 +189,19 @@ class Board
         #puts "DIRECT ESCAPE IF #{can_escape}"
         puts "DEBUG can this piece move out #{can_escape}"
         return can_escape
+    end
+
+    def chess_for_one_move(defender_color_binary,piece,destination)
+        still_chessed = false
+        old_pos = piece.position
+        puts "DEBUG RUNING MOVE PIECE FOR #{piece.quick_info}"
+        puts "is  #{defender_color_binary} in chess?"
+
+        piece.position = destination
+        still_chessed = true if chess?(defender_color_binary)
+        piece.position = old_pos
+        return still_chessed
+
     end
 
     def check_mate_2?(defendant_color_binary)
@@ -223,28 +236,19 @@ class Board
         
     end
 
-    def check_chess_for_one_move(piece, defender_color_binary,destination_arr)
-        chess_for_this_move = false
-        old_pos =  piece.position
-        piece.position = destination_arr
-        chess_for_this_move = true if  chess?(defender_color_binary)
-        piece.position = old_pos
-        puts "this move will put you in chess ? #{chess_for_this_move}" 
-        return chess_for_this_move
-    end
 
     def display  #Working
         x = 0
         y = 7
         color = @bg_color_2
-        helper_arr = ["N1","N2","N3","N4","N5","N6","N7","N8"]
+        helper_arr = ["1","2","3","4","5","6","7","8"]
         helper_arr_index = [" 0"," 1"," 2"," 3"," 4"," 5"," 6"," 7"]
         8.times do
             color = alternate_board_color(color)
             
-            print helper_arr[y].red
+            print helper_arr[y]
             
-            print helper_arr_index[y].green
+            #print helper_arr_index[y].green
             
             8.times do
                 color = alternate_board_color(color)
@@ -258,8 +262,8 @@ class Board
             x = 0
             y -= 1  
         end
-        puts '      0    1    2    3    4    5    6    7'.green
-        puts '      A    B    C    D    E    F    G    H'
+        #puts '      0    1    2    3    4    5    6    7'.green
+        puts '    A    B    C    D    E    F    G    H'
          
     end
 
@@ -290,7 +294,7 @@ class Board
         File.open("saved_games/#{file_name}.json", "w") do |f|
             f.write(serialized_board)
           end
-        puts "Game succesfully loaded"  
+        puts "Game succesfully Saved"  
 
 
     end
